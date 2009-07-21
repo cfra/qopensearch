@@ -1,0 +1,8 @@
+Makefile*
+.ui
+.moc
+.obj
+.rcc
+.qm
+.gdb_history
+*~

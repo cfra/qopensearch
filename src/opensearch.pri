@@ -5,10 +5,12 @@ QT += network script
 
 HEADERS += \
     opensearchengine.h \
+    opensearchenginedelegate.h \
     opensearchreader.h \
     opensearchwriter.h
 
 SOURCES += \
     opensearchengine.cpp \
+    opensearchenginedelegate.cpp \
     opensearchreader.cpp \
     opensearchwriter.cpp

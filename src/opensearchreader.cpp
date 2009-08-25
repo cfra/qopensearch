@@ -150,14 +150,17 @@ OpenSearchEngine *OpenSearchReader::read()
             }
 
         } else if (name() == QLatin1String("Image")) {
-             engine->setImageUrl(readElementText());
+            engine->setImageUrl(readElementText());
+        } else if (name() == QLatin1String("Tags")) {
+            engine->setTags(readElementText().split(QLatin1Char(' '), QString::SkipEmptyParts));
         }
 
         if (!engine->name().isEmpty()
             && !engine->description().isEmpty()
             && !engine->suggestionsUrlTemplate().isEmpty()
             && !engine->searchUrlTemplate().isEmpty()
-            && !engine->imageUrl().isEmpty())
+            && !engine->imageUrl().isEmpty()
+            && !engine->tags().isEmpty())
             break;
     }
 

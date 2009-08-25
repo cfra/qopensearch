@@ -25,6 +25,7 @@
 #include <qmap.h>
 #include <qnetworkaccessmanager.h>
 #include <qstring.h>
+#include <qstringlist.h>
 #include <qurl.h>
 
 class QNetworkReply;
@@ -53,6 +54,7 @@ public:
     Q_PROPERTY(QString suggestionsMethod READ suggestionsMethod WRITE setSuggestionsMethod)
     Q_PROPERTY(bool providesSuggestions READ providesSuggestions)
     Q_PROPERTY(QString imageUrl READ imageUrl WRITE setImageUrl)
+    Q_PROPERTY(QStringList tags READ tags WRITE setTags)
     Q_PROPERTY(bool valid READ isValid)
     Q_PROPERTY(QNetworkAccessManager* networkAccessManager READ networkAccessManager WRITE setNetworkAccessManager)
 
@@ -93,6 +95,9 @@ public:
     QImage image() const;
     void setImage(const QImage &image);
 
+    QStringList tags() const;
+    void setTags(const QStringList &tags);
+
     bool isValid() const;
 
     QNetworkAccessManager *networkAccessManager() const;
@@ -122,6 +127,8 @@ private:
 
     QString m_imageUrl;
     QImage m_image;
+
+    QStringList m_tags;
 
     QString m_searchUrlTemplate;
     QString m_suggestionsUrlTemplate;

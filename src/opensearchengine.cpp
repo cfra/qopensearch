@@ -421,6 +421,20 @@ void OpenSearchEngine::setImage(const QImage &image)
 }
 
 /*!
+    \property tags
+    \brief a set of words that are used as keywords to identify and categorize this search content
+*/
+QStringList OpenSearchEngine::tags() const
+{
+    return m_tags;
+}
+
+void OpenSearchEngine::setTags(const QStringList &tags)
+{
+    m_tags = tags;
+}
+
+/*!
     \property valid
     \brief indicates whether the engine is valid i.e. the description was properly formed and included all necessary information
 */

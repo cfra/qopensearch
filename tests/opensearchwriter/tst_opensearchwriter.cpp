@@ -71,22 +71,23 @@ void tst_OpenSearchWriter::write_data()
     QTest::addColumn<OpenSearchEngine::Parameters>("suggestionsParameters");
     QTest::addColumn<QString>("searchMethod");
     QTest::addColumn<QString>("suggestionsMethod");
+    QTest::addColumn<QStringList>("tags");
     QTest::addColumn<QString>("fileName");
 
     QTest::newRow("testfile1") << QString("Foo Bar") << QString("Bar Foo") << QString("http://foobar.barfoo/search") << QString()
             << QString() << OpenSearchEngine::Parameters() << OpenSearchEngine::Parameters()
-            << QString() << QString("get") << QString(":/testfile1.xml");
+            << QString() << QString("get") << QStringList() << QString(":/testfile1.xml");
 
     QTest::newRow("testfile2") << QString("Arora!") << QString("a cross platform web browser built using Qt and WebKit")
             << QString("http://foobar.barfoo/search") << QString("http://foobar.barfoo/suggest") << QString()
-            << OpenSearchEngine::Parameters() << OpenSearchEngine::Parameters()
-            << QString("get") << QString("post") << QString(":/testfile2.xml");
+            << OpenSearchEngine::Parameters() << OpenSearchEngine::Parameters() << QString("get") << QString("post")
+            << (QStringList() << "foo" << "bar") << QString(":/testfile2.xml");
 
     QTest::newRow("testile3") << QString("Foo Bar") << QString("Bar Foo") << QString("http://foobar.barfoo/search")
             << QString("http://foobar.barfoo/suggest") << QString()
             << (OpenSearchEngine::Parameters() << OpenSearchEngine::Parameter("q", "{searchTerms}") << OpenSearchEngine::Parameter("a", "foo"))
             << (OpenSearchEngine::Parameters() << OpenSearchEngine::Parameter("q", "{searchTerms}"))
-            << QString("post") << QString("foo") << QString(":/testfile3.xml");
+            << QString("post") << QString("foo") << QStringList() << QString(":/testfile3.xml");
 }
 
 void tst_OpenSearchWriter::write()
@@ -100,6 +101,7 @@ void tst_OpenSearchWriter::write()
     QFETCH(OpenSearchEngine::Parameters, suggestionsParameters);
     QFETCH(QString, searchMethod);
     QFETCH(QString, suggestionsMethod);
+    QFETCH(QStringList, tags);
     QFETCH(QString, fileName);
 
     OpenSearchEngine engine;
@@ -114,6 +116,7 @@ void tst_OpenSearchWriter::write()
     engine.setSuggestionsParameters(suggestionsParameters);
     engine.setSearchMethod(searchMethod);
     engine.setSuggestionsMethod(suggestionsMethod);
+    engine.setTags(tags);
 
     QByteArray output;
     QBuffer buffer(&output);

@@ -4,4 +4,5 @@
     <Description>a cross platform web browser built using Qt and WebKit</Description>
     <Url method="get" type="text/html" template="http://foobar.barfoo/search"/>
     <Url method="post" type="application/x-suggestions+json" template="http://foobar.barfoo/suggest"/>
+    <Tags>foo bar</Tags>
 </OpenSearchDescription>

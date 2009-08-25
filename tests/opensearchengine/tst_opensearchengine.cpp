@@ -272,6 +272,9 @@ void tst_OpenSearchEngine::opensearchengine()
     QCOMPARE(engine.suggestionsParameters(), QList<Parameter>());
     QCOMPARE(engine.suggestionsUrl(QString()), QUrl());
     QCOMPARE(engine.suggestionsUrlTemplate(), QString());
+    QCOMPARE(engine.tags(), QStringList());
+    engine.setTags(QStringList() << "foo" << "bar");
+    QCOMPARE(engine.tags(), QStringList() << "foo" << "bar");
     engine.call_imageChanged();
     engine.call_loadImage();
     QVERIFY(!engine.networkAccessManager());

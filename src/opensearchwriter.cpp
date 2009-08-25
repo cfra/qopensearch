@@ -130,6 +130,9 @@ void OpenSearchWriter::write(OpenSearchEngine *engine)
     if (!engine->imageUrl().isEmpty())
         writeTextElement(QLatin1String("Image"), engine->imageUrl());
 
+    if (!engine->tags().isEmpty())
+        writeTextElement(QLatin1String("Tags"), engine->tags().join(QLatin1String(" ")));
+
     writeEndElement();
     writeEndDocument();
 }

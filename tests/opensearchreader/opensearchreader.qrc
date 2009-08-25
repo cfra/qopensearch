@@ -7,5 +7,6 @@
     <file>testfile5.xml</file>
     <file>testfile6.xml</file>
     <file>testfile7.xml</file>
+    <file>testfile8.xml</file>
 </qresource>
 </RCC>

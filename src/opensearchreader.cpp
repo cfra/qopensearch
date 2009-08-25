@@ -47,6 +47,7 @@
 */
 OpenSearchReader::OpenSearchReader()
     : QXmlStreamReader()
+    , m_engine(0)
 {
 }
 
@@ -68,18 +69,22 @@ OpenSearchReader::OpenSearchReader()
 */
 OpenSearchEngine *OpenSearchReader::read(QIODevice *device)
 {
+    m_engine = 0;
     clear();
 
     if (!device->isOpen())
         device->open(QIODevice::ReadOnly);
 
     setDevice(device);
-    return read();
+    readDocument();
+    return m_engine;
 }
 
-OpenSearchEngine *OpenSearchReader::read()
+#include <qdebug.h>
+
+void OpenSearchReader::readDocument()
 {
-    OpenSearchEngine *engine = new OpenSearchEngine();
+    m_engine = new OpenSearchEngine();
 
     while (!isStartElement() && !atEnd())
         readNext();
@@ -87,83 +92,138 @@ OpenSearchEngine *OpenSearchReader::read()
     if (name() != QLatin1String("OpenSearchDescription")
         || namespaceUri() != QLatin1String("http://a9.com/-/spec/opensearch/1.1/")) {
         raiseError(QObject::tr("The file is not an OpenSearch 1.1 file."));
-        return engine;
+        return;
     }
 
     while (!atEnd()) {
         readNext();
 
+        if (isEndElement())
+            break;
+
         if (!isStartElement())
             continue;
 
-        if (name() == QLatin1String("ShortName")) {
-            engine->setName(readElementText());
-        } else if (name() == QLatin1String("Description")) {
-            engine->setDescription(readElementText());
-        } else if (name() == QLatin1String("Url")) {
-
-            QString type = attributes().value(QLatin1String("type")).toString();
-            QString url = attributes().value(QLatin1String("template")).toString();
-            QString method = attributes().value(QLatin1String("method")).toString();
-
-            if (type == QLatin1String("application/x-suggestions+json")
-                && !engine->suggestionsUrlTemplate().isEmpty())
-                continue;
-
-            if ((type.isEmpty()
-                || type == QLatin1String("text/html")
-                || type == QLatin1String("application/xhtml+xml"))
-                && !engine->searchUrlTemplate().isEmpty())
-                continue;
-
-            if (url.isEmpty())
-                continue;
-
-            QList<OpenSearchEngine::Parameter> parameters;
-
-            readNext();
-
-            while (!(isEndElement() && name() == QLatin1String("Url"))) {
-                if (!isStartElement() || (name() != QLatin1String("Param") && name() != QLatin1String("Parameter"))) {
-                    readNext();
-                    continue;
-                }
-
-                QString key = attributes().value(QLatin1String("name")).toString();
-                QString value = attributes().value(QLatin1String("value")).toString();
-
-                if (!key.isEmpty() && !value.isEmpty())
-                    parameters.append(OpenSearchEngine::Parameter(key, value));
-
-                while (!isEndElement())
-                    readNext();
-            }
-
-            if (type == QLatin1String("application/x-suggestions+json")) {
-                engine->setSuggestionsUrlTemplate(url);
-                engine->setSuggestionsParameters(parameters);
-                engine->setSuggestionsMethod(method);
-            } else if (type.isEmpty() || type == QLatin1String("text/html") || type == QLatin1String("application/xhtml+xml")) {
-                engine->setSearchUrlTemplate(url);
-                engine->setSearchParameters(parameters);
-                engine->setSearchMethod(method);
-            }
-
-        } else if (name() == QLatin1String("Image")) {
-            engine->setImageUrl(readElementText());
-        } else if (name() == QLatin1String("Tags")) {
-            engine->setTags(readElementText().split(QLatin1Char(' '), QString::SkipEmptyParts));
-        }
-
-        if (!engine->name().isEmpty()
-            && !engine->description().isEmpty()
-            && !engine->suggestionsUrlTemplate().isEmpty()
-            && !engine->searchUrlTemplate().isEmpty()
-            && !engine->imageUrl().isEmpty()
-            && !engine->tags().isEmpty())
-            break;
+        if (name() == QLatin1String("ShortName"))
+            readName();
+        else if (name() == QLatin1String("Description"))
+            readDescription();
+        else if (name() == QLatin1String("Url"))
+            readUrl();
+        else if (name() == QLatin1String("Image"))
+            readImage();
+        else if (name() == QLatin1String("Tags"))
+            readTags();
+        else
+            skipSubtree();
     }
-
-    return engine;
 }
 
+void OpenSearchReader::readName()
+{
+    Q_ASSERT(isStartElement() && name() == QLatin1String("ShortName"));
+    m_engine->setName(readElementText());
+}
+
+void OpenSearchReader::readDescription()
+{
+    Q_ASSERT(isStartElement() && name() == QLatin1String("Description"));
+    m_engine->setDescription(readElementText());
+}
+
+void OpenSearchReader::readUrl()
+{
+    Q_ASSERT(isStartElement() && name() == QLatin1String("Url"));
+
+    QString type = attributes().value(QLatin1String("type")).toString();
+    QString url = attributes().value(QLatin1String("template")).toString();
+    QString method = attributes().value(QLatin1String("method")).toString();
+
+    if (type.isEmpty() || type == QLatin1String("application/xhtml+xml"))
+        type = QLatin1String("text/html");
+
+    if (url.isEmpty()) {
+        skipSubtree();
+        return;
+    }
+
+    if (type == QLatin1String("application/x-suggestions+json")
+        && !m_engine->suggestionsUrlTemplate().isEmpty()) {
+        skipSubtree();
+        return;
+    }
+
+    if (type == QLatin1String("text/html")
+        && !m_engine->searchUrlTemplate().isEmpty()) {
+        skipSubtree();
+        return;
+    }
+
+    OpenSearchEngine::Parameters parameters;
+
+    while (!atEnd()) {
+        readNext();
+
+        if (isEndElement())
+            break;
+
+        if (!isStartElement())
+            continue;
+
+        if (name() == QLatin1String("Param") || name() == QLatin1String("Parameter"))
+            readParameter(&parameters);
+        else
+            skipSubtree();
+    }
+
+    if (type == QLatin1String("application/x-suggestions+json")) {
+        m_engine->setSuggestionsUrlTemplate(url);
+        m_engine->setSuggestionsParameters(parameters);
+        m_engine->setSuggestionsMethod(method);
+    } else if (type == QLatin1String("text/html")) {
+        m_engine->setSearchUrlTemplate(url);
+        m_engine->setSearchParameters(parameters);
+        m_engine->setSearchMethod(method);
+    }
+}
+
+void OpenSearchReader::readParameter(OpenSearchEngine::Parameters *parameters)
+{
+    Q_ASSERT(isStartElement() && (name() == QLatin1String("Param") || name() == QLatin1String("Parameter")));
+
+    QString key = attributes().value(QLatin1String("name")).toString();
+    QString value = attributes().value(QLatin1String("value")).toString();
+
+    if (key.isEmpty() || value.isEmpty())
+        return;
+
+    parameters->append(OpenSearchEngine::Parameter(key, value));
+    readNext();
+}
+
+void OpenSearchReader::readImage()
+{
+    Q_ASSERT(isStartElement() && name() == QLatin1String("Image"));
+    m_engine->setImageUrl(readElementText());
+}
+
+void OpenSearchReader::readTags()
+{
+    Q_ASSERT(isStartElement() && name() == QLatin1String("Tags"));
+    m_engine->setTags(readElementText().split(QLatin1Char(' '), QString::SkipEmptyParts));
+}
+
+void OpenSearchReader::skipSubtree()
+{
+    Q_ASSERT(isStartElement());
+
+    while (!atEnd()) {
+        readNext();
+
+        if (isEndElement())
+            break;
+
+        if (isStartElement())
+            skipSubtree();
+    }
+}

@@ -22,18 +22,26 @@
 
 #include <qxmlstream.h>
 
-class OpenSearchEngine;
+#include "opensearchengine.h"
 
 class OpenSearchReader : public QXmlStreamReader
 {
 public:
     OpenSearchReader();
-
     OpenSearchEngine *read(QIODevice *device);
 
 private:
-    OpenSearchEngine *read();
+    void readDocument();
+    void readName();
+    void readDescription();
+    void readUrl();
+    void readParameter(OpenSearchEngine::Parameters *parameters);
+    void readImage();
+    void readTags();
+    void skipSubtree();
 
+private:
+    OpenSearchEngine *m_engine;
 };
 
 #endif // OPENSEARCHREADER_H

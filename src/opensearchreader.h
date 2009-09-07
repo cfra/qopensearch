@@ -45,4 +45,3 @@ private:
 };
 
 #endif // OPENSEARCHREADER_H
-

@@ -23,15 +23,16 @@
 #include <qpair.h>
 #include <qimage.h>
 #include <qmap.h>
-#include <qnetworkaccessmanager.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qurl.h>
 
+class QNetworkAccessManager;
 class QNetworkReply;
 class QScriptEngine;
 
 class OpenSearchEngineDelegate;
+class OpenSearchEnginePrivate;
 class OpenSearchEngine : public QObject
 {
     Q_OBJECT
@@ -122,30 +123,7 @@ private slots:
     void suggestionsObtained();
 
 private:
-    QString m_name;
-    QString m_description;
-
-    QString m_imageUrl;
-    QImage m_image;
-
-    QStringList m_tags;
-
-    QString m_searchUrlTemplate;
-    QString m_suggestionsUrlTemplate;
-    Parameters m_searchParameters;
-    Parameters m_suggestionsParameters;
-    QString m_searchMethod;
-    QString m_suggestionsMethod;
-
-    QMap<QString, QNetworkAccessManager::Operation> m_requestMethods;
-
-    QNetworkAccessManager *m_networkAccessManager;
-    QNetworkReply *m_suggestionsReply;
-
-    QScriptEngine *m_scriptEngine;
-
-    OpenSearchEngineDelegate *m_delegate;
+    OpenSearchEnginePrivate *d;
 };
 
 #endif // OPENSEARCHENGINE_H
-

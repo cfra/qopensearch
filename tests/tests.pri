@@ -5,10 +5,8 @@ CONFIG += qtestlib
 
 HEADERS += qtry.h
 
+include(../build.pri)
+DESTDIR = $$BUILDDIR
+
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
-
-RCC_DIR     = $$PWD/.rcc
-UI_DIR      = $$PWD/.ui
-MOC_DIR     = $$PWD/.moc
-OBJECTS_DIR = $$PWD/.obj

@@ -1,16 +1,8 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-QT += network script
+include(../build.pri)
 
-HEADERS += \
-    opensearchengine.h \
-    opensearchenginedelegate.h \
-    opensearchreader.h \
-    opensearchwriter.h
-
-SOURCES += \
-    opensearchengine.cpp \
-    opensearchenginedelegate.cpp \
-    opensearchreader.cpp \
-    opensearchwriter.cpp
+LIBS += -L$$BUILDDIR \
+    -Wl,-rpath,$$BUILDDIR \
+    -lqopensearch

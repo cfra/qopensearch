@@ -1,5 +1,5 @@
 BUILDDIR = $$PWD/build
-TEMPDIR = $$BUILDDIR/tmp/$$TARGET
+TEMPDIR = $$BUILDDIR/tmp
 
 RCC_DIR     = $$TEMPDIR
 UI_DIR      = $$TEMPDIR

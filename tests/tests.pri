@@ -6,7 +6,7 @@ CONFIG += qtestlib
 HEADERS += qtry.h
 
 include(../build.pri)
-DESTDIR = $$BUILDDIR
+DESTDIR = $$BUILDDIR/tests
 
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD

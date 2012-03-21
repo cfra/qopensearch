@@ -530,7 +530,7 @@ void OpenSearchEngine::requestSuggestions(const QString &searchTerm)
         Parameters::const_iterator end = d->suggestionsParameters.constEnd();
         Parameters::const_iterator i = d->suggestionsParameters.constBegin();
         for (; i != end; ++i)
-            parameters.append(i->first + QLatin1String("=") + i->second);
+            parameters.append(i->first + QLatin1String("=") + parseTemplate(searchTerm, i->second));
 
         QByteArray data = parameters.join(QLatin1String("&")).toUtf8();
         d->suggestionsReply = d->networkAccessManager->post(QNetworkRequest(suggestionsUrl(searchTerm)), data);
@@ -565,7 +565,7 @@ void OpenSearchEngine::requestSearchResults(const QString &searchTerm)
         Parameters::const_iterator end = d->searchParameters.constEnd();
         Parameters::const_iterator i = d->searchParameters.constBegin();
         for (; i != end; ++i)
-            parameters.append(i->first + QLatin1String("=") + i->second);
+            parameters.append(i->first + QLatin1String("=") + parseTemplate(searchTerm, i->second));
 
         data = parameters.join(QLatin1String("&")).toUtf8();
     }
